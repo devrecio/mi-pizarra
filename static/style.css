@@ -1,0 +1,107 @@
+body, html {
+  margin: 0;
+  font-family: sans-serif;
+  background: #1e1e1e;
+  color: #fff;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px;
+  background: #111;
+  align-items: center;
+}
+
+.tool-btn, button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #333;
+  color: #fff;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.tool-btn:hover, button:hover { background: #555; }
+.tool-btn.active { background-color: #2563eb; color: #fff; }
+
+.dropdown { position: relative; display: inline-block; }
+.dropdown > .tool-btn::after { content: "⌄"; font-size: 10px; margin-left: 4px; color: #ccc; }
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #222;
+  border: 1px solid #444;
+  min-width: 130px;
+  border-radius: 5px;
+  z-index: 1000;
+  overflow: hidden;
+}
+.dropdown:hover .dropdown-content, .dropdown.open .dropdown-content { display: block; }
+.dropdown-content .tool-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: #eee;
+}
+.dropdown-content .tool-btn:hover { background-color: #2563eb; color: white; }
+
+/* Canvas container */
+.canvas-container {
+  width: 100%;
+  height: calc(100vh - 60px);
+  position: relative;
+  background: #000;
+  border: 2px solid #333;
+  overflow: auto;
+}
+
+/* Canvas */
+#canvas { display: block; background: #000; }
+
+/* Text input floating box */
+#textInputBox {
+  position: absolute;
+  display: none;
+  top: 100px;
+  left: 100px;
+  background: #222;
+  padding: 10px;
+  border: 1px solid #444;
+  z-index: 2000;
+  border-radius: 4px;
+  color: #fff;
+}
+#textInputBox input {
+  font-size: 1.2rem;
+  padding: 5px;
+  margin-right: 5px;
+  background: #333;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbar { flex-direction: column; gap: 8px; align-items: stretch; }
+  .tool-btn, button { width: 100%; font-size: 1rem; }
+  input[type="color"], input[type="range"] { width: 100%; }
+  .canvas-container { height: calc(100vh - 300px); }
+}
+
+
+
+
