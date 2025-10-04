@@ -66,7 +66,7 @@ function expandCanvasIfNeeded(x, y) {
   if (expanded) redrawCanvas();
 }
 
-// --- Dibujo ---
+// --- Iniciar dibujo ---
 function startDraw(x, y) {
   if (tool === "hand") {
     isPanning = true;
@@ -117,7 +117,7 @@ function drawMove(x, y) {
   if (tool === "brush" || tool === "eraser") {
     const drawColor = tool === "eraser" ? "eraser" : color;
 
-    // Dibujar suavemente local
+    // Dibujar localmente
     ctx.lineWidth = size;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -130,10 +130,10 @@ function drawMove(x, y) {
     ctx.stroke();
     ctx.globalCompositeOperation = "source-over";
 
-    // Guardar en historial
+    // Guardar segmento local
     history.push({ type: "line", x1: startX, y1: startY, x2: currX, y2: currY, color: drawColor, size });
 
-    // Enviar segmento al WebSocket
+    // Enviar segmento a otros clientes
     ws?.send(JSON.stringify({ type: "line", x1: startX, y1: startY, x2: currX, y2: currY, color: drawColor, size }));
 
     startX = currX;
@@ -141,6 +141,7 @@ function drawMove(x, y) {
   }
 }
 
+// --- Finalizar dibujo ---
 function endDraw(x, y) {
   if (tool === "hand") { isPanning = false; return; }
   if (!drawing) return;
@@ -227,7 +228,6 @@ canvas.addEventListener("touchstart", e => { const {x,y} = getCoords(e); startDr
 canvas.addEventListener("touchmove", e => { e.preventDefault(); const {x,y} = getCoords(e); drawMove(x,y); }, { passive:false });
 canvas.addEventListener("touchend", e => { const {x,y} = getCoords(e.changedTouches[0]); endDraw(x,y); });
 
-
 // --- WebSocket ---
 ws.onmessage = event => {
   const data = JSON.parse(event.data);
@@ -238,26 +238,21 @@ ws.onmessage = event => {
       redoHistory = [];
       redrawCanvas();
       break;
-
     case "pan":
       panX = data.panX;
       panY = data.panY;
       canvas.style.transform = `translate(${panX}px,${panY}px)`;
       break;
-
     case "line":
     case "rect":
     case "circle":
     case "text":
-      // Guardamos todos los elementos en el historial
+      // Dibujar elementos que vienen de otros clientes
       history.push(data);
-      // Redibujamos todo desde el historial para mantener consistencia
       redrawCanvas();
       break;
-
-    default:
-      console.warn("Tipo de mensaje desconocido:", data.type);
   }
 };
+
 
 
