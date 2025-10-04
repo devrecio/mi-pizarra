@@ -227,25 +227,37 @@ canvas.addEventListener("touchstart", e => { const {x,y} = getCoords(e); startDr
 canvas.addEventListener("touchmove", e => { e.preventDefault(); const {x,y} = getCoords(e); drawMove(x,y); }, { passive:false });
 canvas.addEventListener("touchend", e => { const {x,y} = getCoords(e.changedTouches[0]); endDraw(x,y); });
 
+
 // --- WebSocket ---
 ws.onmessage = event => {
   const data = JSON.parse(event.data);
-  if (data.type === "clear") { history=[]; redoHistory=[]; redrawCanvas(); }
-  else if (data.type === "pan") { panX=data.panX; panY=data.panY; canvas.style.transform=`translate(${panX}px,${panY}px)`; }
-  else if (data.type === "line") {
-    // Dibujar en tiempo real desde otros clientes
-    ctx.lineWidth = data.size;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = (data.color === "eraser") ? "rgba(0,0,0,1)" : data.color;
-    ctx.globalCompositeOperation = (data.color === "eraser") ? "destination-out" : "source-over";
-    ctx.beginPath();
-    ctx.moveTo(data.x1, data.y1);
-    ctx.lineTo(data.x2, data.y2);
-    ctx.stroke();
-    ctx.globalCompositeOperation = "source-over";
-    history.push(data);
+
+  switch (data.type) {
+    case "clear":
+      history = [];
+      redoHistory = [];
+      redrawCanvas();
+      break;
+
+    case "pan":
+      panX = data.panX;
+      panY = data.panY;
+      canvas.style.transform = `translate(${panX}px,${panY}px)`;
+      break;
+
+    case "line":
+    case "rect":
+    case "circle":
+    case "text":
+      // Guardamos todos los elementos en el historial
+      history.push(data);
+      // Redibujamos todo desde el historial para mantener consistencia
+      redrawCanvas();
+      break;
+
+    default:
+      console.warn("Tipo de mensaje desconocido:", data.type);
   }
-  else if (["rect","circle","text"].includes(data.type)) { history.push(data); redrawCanvas(); }
 };
+
 
